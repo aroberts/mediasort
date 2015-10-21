@@ -1,0 +1,21 @@
+Metadata-Version: 1.1
+Name: mediasort
+Version: 0.1
+Summary: Media type detection
+Home-page: https://github.com/aroberts
+Author: Andrew Roberts
+Author-email: adroberts@gmail.com
+License: BSD
+Description: 
+        Perform an action based on media type
+        
+Platform: UNKNOWN
+Classifier: Development Status :: 3 - Alpha
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: Unix
+Classifier: Operating System :: POSIX
+Classifier: Programming Language :: Python
+Classifier: Programming Language :: Python :: 2.7

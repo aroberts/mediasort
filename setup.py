@@ -28,9 +28,12 @@ setup(
     url='https://github.com/aroberts',
 
     packages=find_packages(),
+
+    install_requires=['requests'],
+
     entry_points={
         'console_scripts': [
-            'mediasort = mediasort.mediasort:main',
+            'mediasort = mediasort.cli:main',
         ]
     },
 
