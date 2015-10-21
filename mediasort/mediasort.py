@@ -1,3 +1,4 @@
+from mediasort.classify.omdb import Omdb
 import sys, os
 import re
 import requests
@@ -7,6 +8,7 @@ import operator
 import logging
 logger = logging.getLogger(__name__)
 
+
 root = "/Volumes/Download"
 
 IMDB_URL_REGEX = re.compile(r'^http://www.imdb.com/title/(tt[0-9]+)/$',
@@ -15,7 +17,7 @@ IMDB_ID_REGEX = re.compile(r'(tt\d{7})')
 
 SEASON_NAME_REGEX = re.compile(r'(S\d\d?E\d\d?)', re.IGNORECASE)
 WHOLE_SEASON_REGEX = re.compile(r'(Season.?\d+)', re.IGNORECASE)
-HD_RES_REGEX = re.compile(r'^(.*)((?:480|720|1080)(?:p|i))', re.IGNORECASE)
+HD_YEAR_RES_REGEX = re.compile(r'^(.*)[.-_ ](\d{4})[.-_ ]((?:480|720|1080)(?:p|i))', re.IGNORECASE)
 TITLE_AND_YEAR_REGEX = re.compile(r'^(.*) (\d{0,4})')
 
 
@@ -24,13 +26,15 @@ def main():
     tv = []
     other = []
 
+    omdb = Omdb()
+
     for f in os.listdir(root):
         full_path = os.path.join(root, f)
 
         if os.path.isdir(full_path):
             nfos = find_nfos(full_path)
             ids = [extract_imdb_id(nfo) for nfo in nfos]
-            omdb_responses = filter(None, [omdbapi(imdb=i) for i in ids])
+            omdb_responses = filter(None, [Omdb.api(imdb=i) for i in ids])
             omdb_types = map(operator.itemgetter('Type'), omdb_responses)
 
             if 'movie' in omdb_types:
@@ -55,15 +59,20 @@ def main():
 
 
 def detect_movie(root, f):
-    match = HD_RES_REGEX.search(f)
+    match = HD_YEAR_RES_REGEX.search(f)
     if match:
+        logger.debug(match.groups())
         resolution = match.group(2)
         parts = re.split('[-_. ]', match.group(1))
-        title_and_year = ' '.join(filter(None, parts))
+        title = ' '.join(filter(None, parts))
+        year = match.group(2)
 
-        omdb = omdbapi(title=title_and_year)
-        if omdb:
-            print omdb
+        logger.debug(title)
+        logger.debug(year)
+        omdb = omdbapi(title=title, year=year)
+        logger.debug('Response: %s' % omdb.get("Response"))
+        logger.debug('Type: %s' % omdb.get("Type"))
+        return omdb.get("Response") == "True" and omdb.get("Type") == "movie"
 
 
 def detect_tv(root, f):
@@ -87,7 +96,8 @@ def extract_imdb_id(nfo_file):
             return match.group(1)
 
 def has_season_in_name(path):
-    return SEASON_NAME_REGEX.search(path)
+    return (SEASON_NAME_REGEX.search(path) or
+            WHOLE_SEASON_REGEX.search(path))
 
 def print_report(movies, tv, other):
     print_list('Movies', movies)
@@ -100,23 +110,6 @@ def print_list(label, items):
     for m in items:
         print m
     print ""
-
-
-def omdbapi(title=None, imdb=None):
-    if not (title or imdb):
-        return None
-
-    params = dict(t=title, i=imdb)
-    resp = requests.get("http://www.omdbapi.com", params=params)
-    try:
-        return resp.json()
-    except:
-        logger.error("omdb error:")
-        for line in r.iter_lines():
-            logger.error(line)
-
-    return None
-
 
 
 if __name__ == "__main__":
