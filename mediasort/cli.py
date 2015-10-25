@@ -17,7 +17,8 @@ def main():
     classifier = Classifier(root)
 
     for f in os.listdir(root):
-        categories[classifier.classify(f)].append(f)
+        c = classifier.classify(f)
+        categories[c.media_type].append((f, c.score))
 
     for label, entries in categories.items():
         print label

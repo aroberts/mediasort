@@ -1,5 +1,6 @@
 import operator
 import os
+import mimetypes
 
 from mediasort.classify.omdb import Omdb
 from mediasort.classify.imdb import (
@@ -10,7 +11,10 @@ from mediasort.classify.imdb import (
 from mediasort.classify.tv import detect_tv
 from mediasort.classify.movies import detect_movie
 
-from mediasort import MEDIA_TYPES
+from mediasort.classify.classification import (
+    MEDIA_TYPES,
+    Classification,
+)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -21,25 +25,36 @@ class Classifier(object):
         self.root_path = root_path
         self.omdb = Omdb()
 
+    def get_types(self, path):
+        types = []
+        full_path = os.path.join(self.root_path, path)
+        if os.path.isdir(full_path):
+            for folder, _, files in os.walk(full_path):
+                for filename in files:
+                    types.append(mimetypes.guess_type(filename)[0])
+
+        else:
+            types.append(mimetypes.guess_type(path)[0])
+
+        return filter(None, list(set(types)))
 
     def classify(self, path):
         full_path = os.path.join(self.root_path, path)
 
-        # Try to classify by NFO
-        by_nfo = self.classify_by_nfo(full_path)
-        if by_nfo:
-            logger.debug("[NFO] %s" % path)
-            return by_nfo
+        types = self.get_types(path)
 
-        # next, detect via tv module
-        if detect_tv(path):
-            return MEDIA_TYPES.tv
+        classifications = [
+            self.classify_by_nfo(full_path),
+            Classification.none(),
+        ]
 
-        # next, detect via movie module
-        if detect_movie(path):
-            return MEDIA_TYPES.movie
+        if any(['video' in t for t in types]):
+            classifications.extend([
+                detect_tv(path),
+                detect_movie(path),
+            ])
 
-        return MEDIA_TYPES.other
+        return max(classifications)
 
 
     def classify_by_nfo(self, full_path):
@@ -51,9 +66,9 @@ class Classifier(object):
             omdb_types = map(operator.itemgetter('Type'), omdb_responses)
 
             if 'movie' in omdb_types:
-                return MEDIA_TYPES.movie
+                return Classification(MEDIA_TYPES.movie, 10)
 
             elif set(['episode', 'series']).intersection(omdb_types):
-                return MEDIA_TYPES.tv
+                return Classification(MEDIA_TYPES.tv, 10)
 
         return None
