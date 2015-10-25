@@ -1,3 +1,0 @@
-[console_scripts]
-mediasort = mediasort.cli:main
-
