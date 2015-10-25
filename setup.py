@@ -29,11 +29,11 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['requests'],
+    install_requires=['requests', 'PyYAML', 'click'],
 
     entry_points={
         'console_scripts': [
-            'mediasort = mediasort.cli:main',
+            'mediasort = mediasort.cli:classify',
         ]
     },
 

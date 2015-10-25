@@ -8,6 +8,24 @@ logger = logging.getLogger(__name__)
 
 from collections import defaultdict
 
+import click
+
+config_option = click.option('--config', '-c', help='path to config.yml')
+path_option = click.argument('path')
+
+
+@click.command()
+@config_option
+@path_option
+def classify(config, path):
+    if not config:
+        raise Exception("Need config")
+
+    classifier = Classifier('/')
+    print classifier.classify(path)
+
+
+
 
 root = "/Volumes/Download"
 
