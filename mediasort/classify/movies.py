@@ -1,3 +1,4 @@
+import os
 import re
 
 from mediasort.classify.omdb import Omdb
@@ -16,8 +17,10 @@ HD_YEAR_RES_REGEX = re.compile(
 
 omdb = Omdb()
 
-def detect_movie(f):
+def detect_movie(path):
     score = 0
+
+    f = os.path.basename(path)
 
     if SEASON_NAME_REGEX.search(f):
         return Classification.none()

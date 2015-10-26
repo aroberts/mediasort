@@ -21,15 +21,14 @@ logger = logging.getLogger(__name__)
 
 class Classifier(object):
 
-    def __init__(self, root_path):
-        self.root_path = root_path
+    def __init__(self, config):
         self.omdb = Omdb()
+        self.config = config
 
     def get_types(self, path):
         types = []
-        full_path = os.path.join(self.root_path, path)
-        if os.path.isdir(full_path):
-            for folder, _, files in os.walk(full_path):
+        if os.path.isdir(path):
+            for folder, _, files in os.walk(path):
                 for filename in files:
                     types.append(mimetypes.guess_type(filename)[0])
 
@@ -39,12 +38,10 @@ class Classifier(object):
         return filter(None, list(set(types)))
 
     def classify(self, path):
-        full_path = os.path.join(self.root_path, path)
-
         types = self.get_types(path)
 
         classifications = [
-            self.classify_by_nfo(full_path),
+            self.classify_by_nfo(path),
             Classification.none(),
         ]
 
@@ -56,11 +53,21 @@ class Classifier(object):
 
         return max(classifications)
 
+    def actions_for(self, classification):
+        actions = self.config.get('actions', [])
+        if not actions:
+            logger.warn("No actions registered in config")
+            return []
 
-    def classify_by_nfo(self, full_path):
+        return [a for a in actions
+                if a['media_type'] == classification.media_type and
+                a['confidence'] <= classification.score]
 
-        if os.path.isdir(full_path):
-            nfos = find_nfos(full_path)
+
+    def classify_by_nfo(self, path):
+
+        if os.path.isdir(path):
+            nfos = find_nfos(path)
             ids = [extract_imdb_id(nfo) for nfo in nfos]
             omdb_responses = filter(None, [self.omdb.api(imdb=i) for i in ids])
             omdb_types = map(operator.itemgetter('Type'), omdb_responses)
@@ -71,4 +78,4 @@ class Classifier(object):
             elif set(['episode', 'series']).intersection(omdb_types):
                 return Classification(MEDIA_TYPES.tv, 10)
 
-        return None
+        return Classification.none()
