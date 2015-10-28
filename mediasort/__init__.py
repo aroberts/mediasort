@@ -8,3 +8,12 @@ formatter = logging.Formatter(
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
+def setup_logging(config):
+    if 'log_path' in config:
+        handler = logging.FileHandler(config['log_path'])
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+
+    if 'log_level' in config:
+        logger.setLevel(getattr(logging, config['log_level'].upper()))

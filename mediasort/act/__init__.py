@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 registry = {}
 
 NO_KEY = object()
@@ -24,12 +27,25 @@ class Action(object):
 
     @classmethod
     def from_config(cls, action_hash):
-        actions = [
-            registry[action](options)
-            for action, options in action_hash['perform'].items()
-        ]
-        [a.validate_options() for a in actions]
-        return actions
+
+        definitions = action_hash['perform']
+        if isinstance(definitions, dict):
+            definitions = [definitions]
+
+        try:
+            actions = [
+                registry[action](options)
+                for d in definitions
+                for action, options in d.items()
+            ]
+
+            [a.validate_options() for a in actions]
+            return actions
+        except KeyError, e:
+            logger.error(e.message)
+            logger.error("Available actions: %s" % registry.keys())
+            # TODO: exit
+            raise
 
     def perform(path):
         raise NotImplementedError()
@@ -37,3 +53,5 @@ class Action(object):
     def validate_options(self):
         pass
 
+
+from mediasort.act.copy_to import CopyTo
