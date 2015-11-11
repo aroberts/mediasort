@@ -52,7 +52,7 @@ class CopyTo(Action):
     def set_mode(cls, path, mode):
         if mode:
             logger.debug("set '%s' to '%r'" % (path, mode))
-            os.chmod(dst, mode)
+            os.chmod(path, mode)
 
 
 class CopyToSubdir(CopyTo):
@@ -67,7 +67,7 @@ class CopyToSubdir(CopyTo):
         path = self.destination()
         if not os.path.exists(path):
             os.makedirs(path)
-            self.set_mode(dst, self.options.get('permissions'))
+            self.set_mode(path, self.options.get('permissions'))
 
     def validate_subdir(self):
         if 'subdir' not in self.options:
