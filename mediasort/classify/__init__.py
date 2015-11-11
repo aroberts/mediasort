@@ -42,7 +42,7 @@ class Classifier(object):
 
         classifications = [
             self.classify_by_nfo(path),
-            Classification.none(),
+            Classification.none(path),
         ]
 
         if any(['video' in t for t in types]):
@@ -73,9 +73,9 @@ class Classifier(object):
             omdb_types = map(operator.itemgetter('Type'), omdb_responses)
 
             if 'movie' in omdb_types:
-                return Classification(MEDIA_TYPES.movie, 10)
+                return Classification(path, MEDIA_TYPES.movie, 10)
 
             elif set(['episode', 'series']).intersection(omdb_types):
-                return Classification(MEDIA_TYPES.tv, 10)
+                return Classification(path, MEDIA_TYPES.tv, 10)
 
-        return Classification.none()
+        return Classification.none(path)

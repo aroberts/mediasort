@@ -7,14 +7,26 @@ MEDIA_TYPES = enum(
     'other'
 )
 
+import re
+SPACERS = re.compile(r'[ -._]')
+
+
 class Classification(object):
-    def __init__(self, mtype, score):
+    def __init__(self, path, mtype, score, name=None):
+        self.path = path
         self.media_type = mtype
         self.score = score
+        self.name = self.normalize_name(name)
 
     @classmethod
-    def none(cls):
-        return cls(mtype=MEDIA_TYPES.other, score=0)
+    def normalize_name(cls, name):
+        if not name:
+            return name
+        return SPACERS.sub(' ', name).strip()
+
+    @classmethod
+    def none(cls, path):
+        return cls(path=path, mtype=MEDIA_TYPES.other, score=0)
 
     def __eq__(self, other):
         try:
@@ -27,7 +39,10 @@ class Classification(object):
         return self.score < other.score
 
     def __str__(self):
-        return "%s(%s)" % (self.media_type, self.score)
+        rv = "%s(%s)" % (self.media_type, self.score)
+        if self.name:
+            rv += " %s" % self.name
+        return rv
 
     def __repr__(self):
         return str(self)

@@ -33,7 +33,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'mediasort = mediasort.cli:classify',
+            'mediasort = mediasort.cli:cli',
         ]
     },
 

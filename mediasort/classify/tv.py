@@ -1,17 +1,22 @@
 import os
 import re
 
-SEASON_NAME_REGEX = re.compile(r'(S\d\d?E\d\d?)', re.IGNORECASE)
-WHOLE_SEASON_REGEX = re.compile(r'(Season.?\d+)', re.IGNORECASE)
-
 from mediasort.classify.classification import Classification, MEDIA_TYPES
+
+
+SEASON_NAME_REGEX = re.compile(r'(.*)(S\d\d?E\d\d?)', re.IGNORECASE)
+WHOLE_SEASON_REGEX = re.compile(r'(.*)(Season.?\d+)', re.IGNORECASE)
 
 def detect_tv(path):
     f = os.path.basename(path)
 
-    if SEASON_NAME_REGEX.search(f):
-        return Classification(MEDIA_TYPES.tv, 6)
-    if WHOLE_SEASON_REGEX.search(f):
-        return Classification(MEDIA_TYPES.tv, 4)
-    return Classification.none()
+    match = SEASON_NAME_REGEX.search(f)
+    if match:
+        return Classification(path, MEDIA_TYPES.tv, 6, name=match.group(1))
+
+    match = WHOLE_SEASON_REGEX.search(f)
+    if match:
+        return Classification(path, MEDIA_TYPES.tv, 4, name=match.group(1))
+
+    return Classification.none(path)
 

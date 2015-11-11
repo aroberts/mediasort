@@ -1,6 +1,10 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import click
+
+from mediasort.lib.validate import Validatable
+
 registry = {}
 
 NO_KEY = object()
@@ -18,7 +22,7 @@ class ActionMetaclass(type):
         registry[key] = cls
         return cls
 
-class Action(object):
+class Action(Validatable):
     __metaclass__ = ActionMetaclass
     __key__ = None
 
@@ -26,7 +30,7 @@ class Action(object):
         self.options = options
 
     @classmethod
-    def from_config(cls, action_hash):
+    def from_config(cls, action_hash, classification):
 
         definitions = action_hash['perform']
         if isinstance(definitions, dict):
@@ -39,15 +43,18 @@ class Action(object):
                 for action, options in d.items()
             ]
 
-            [a.validate_options() for a in actions]
+            for action in actions:
+                action.options['target'] = classification
+                action.validate_options()
+
             return actions
         except KeyError, e:
+            msg = "Available actions: %s" % registry.keys()
             logger.error(e.message)
-            logger.error("Available actions: %s" % registry.keys())
-            # TODO: exit
-            raise
+            logger.error(msg)
+            raise click.ClickException(msg)
 
-    def perform(path):
+    def perform(**kwargs):
         raise NotImplementedError()
 
     def validate_options(self):
@@ -55,3 +62,4 @@ class Action(object):
 
 
 from mediasort.act.copy_to import CopyTo
+from mediasort.act.copy_to import CopyContentsTo

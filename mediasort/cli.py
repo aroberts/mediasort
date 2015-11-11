@@ -20,19 +20,46 @@ dry_run_option = click.option('--dry-run', '-d',
                               default=False)
 path_option = click.argument('path')
 
-
-@click.command()
+@click.group()
 @config_option
-@dry_run_option
-@path_option
-def classify(config, dry_run, path):
-    if not config:
-        raise Exception("Need config")
-
+@click.pass_context
+def cli(ctx, config):
     conf = yaml.load(config)
     setup_logging(conf)
-    classifier = Classifier(conf)
+
+    ctx.obj = dict(
+        config=conf
+    )
+
+@cli.command()
+@path_option
+def test(ctx, path):
+    pass
+
+@cli.command()
+@path_option
+def validate(ctx):
+    pass
+
+@cli.command()
+@dry_run_option
+@path_option
+@click.pass_context
+def classify(ctx, dry_run, path):
+    config = ctx.obj['config']
+
+    if not config:
+        raise click.ClickException("You must provide a config")
+
+    classifier = Classifier(config)
+
+    if path.endswith('/'):
+        path = path[:-1]
+
     rv = classifier.classify(path)
+
+    logger.info("%s: %s" % (path, rv))
+
     for action_set in classifier.actions_for(rv):
-        for action in Action.from_config(action_set):
-            action.perform(path, dry_run=dry_run)
+        for action in Action.from_config(action_set, rv):
+            action.perform(dry_run=dry_run)
