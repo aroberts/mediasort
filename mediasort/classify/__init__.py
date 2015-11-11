@@ -41,6 +41,7 @@ class Classifier(object):
 
     def classify(self, path):
         types = self.get_types(path)
+        logger.debug('%s: found types: %s' % (path, types))
 
         classifications = [
             self.classify_by_nfo(path),
