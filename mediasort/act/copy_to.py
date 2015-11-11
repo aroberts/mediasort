@@ -49,7 +49,7 @@ class CopyTo(Action):
 
 
     @classmethod
-    def set_mode(cls, path, mode)
+    def set_mode(cls, path, mode):
         if mode:
             logger.debug("set '%s' to '%r'" % (path, mode))
             os.chmod(dst, mode)
