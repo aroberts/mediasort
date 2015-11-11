@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
-version = "1.0"
+version = "1.1"
 
 long_description = """
 Perform an action based on media type
@@ -20,7 +20,7 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=['requests', 'PyYAML', 'click'],
+    install_requires=['requests', 'PyYAML', 'click', 'fuzzywuzzy'],
 
     entry_points={
         'console_scripts': [

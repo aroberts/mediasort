@@ -43,7 +43,11 @@ class CopyTo(Action):
         shutil.copy(src, dst_root)
 
     def copy_dir(self, src, dst_root):
-        shutil.copytree(src, os.path.join(dst_root, os.path.basename(src)))
+        dst = os.path.join(dst_root, os.path.basename(src))
+        shutil.copytree(src, dst)
+        mode = self.options.get('permissions')
+        if mode:
+            os.chmod(dst, int(mode, base=8))
 
 
 class CopyToSubdir(CopyTo):
@@ -58,6 +62,9 @@ class CopyToSubdir(CopyTo):
         path = self.destination()
         if not os.path.exists(path):
             os.makedirs(path)
+            mode = self.options.get('permissions')
+            if mode:
+                os.chmod(path, int(mode, base=8))
 
     def validate_subdir(self):
         if 'subdir' not in self.options:
