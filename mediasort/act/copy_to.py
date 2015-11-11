@@ -45,9 +45,16 @@ class CopyTo(Action):
     def copy_dir(self, src, dst_root):
         dst = os.path.join(dst_root, os.path.basename(src))
         shutil.copytree(src, dst)
-        mode = self.options.get('permissions')
+        self.set_mode(dst, self.options.get('permissions'))
+
+
+    @classmethod
+    def set_mode(cls, path, mode)
         if mode:
+            logger.debug("set '%s' to '%r'" % (path, mode))
             os.chmod(dst, mode)
+        else:
+            logger.debug("'%s': mode was empty" % path)
 
 
 class CopyToSubdir(CopyTo):
