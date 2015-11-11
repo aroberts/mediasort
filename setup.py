@@ -1,17 +1,8 @@
 #!/usr/bin/env python
 
-# Support setuptools only, distutils has a divergent and more annoying API and
-# few folks will lack setuptools.
 from setuptools import setup, find_packages
+version = "1.0"
 
-# Version info -- read without importing
-# _locals = {}
-# with open('_version.py') as fp:
-#     exec(fp.read(), None, _locals)
-#     version = _locals['__version__']
-version = "0.1"
-
-# Frankenstein long_description: version-specific changelog note + README
 long_description = """
 Perform an action based on media type
 """
@@ -38,7 +29,7 @@ setup(
     },
 
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta'
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
