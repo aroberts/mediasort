@@ -69,9 +69,7 @@ class CopyToSubdir(CopyTo):
         path = self.destination()
         if not os.path.exists(path):
             os.makedirs(path)
-            mode = self.options.get('permissions')
-            if mode:
-                os.chmod(path, mode)
+            self.set_mode(dst, self.options.get('permissions'))
 
     def validate_subdir(self):
         if 'subdir' not in self.options:
