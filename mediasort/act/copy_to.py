@@ -24,7 +24,9 @@ class CopyTo(Action):
 
     def perform(self, dry_run):
         path = self.options['target'].path
+        self.copy_file_or_dir(path, dry_run=dry_run)
 
+    def copy_file_or_dir(self, path, dry_run):
         logger.info("copying '%s' to '%s'" % (path, self.destination()))
         if os.path.isfile(path):
             action = self.copy_file
@@ -65,10 +67,10 @@ class CopyToSubdir(CopyTo):
         return self.options.get('subdir')
 
     def destination(self):
-        return os.path.join(
+        return os.path.join(*filter(None, [
             self.options.get('destination'),
             self.subdir(),
-        )
+        ]))
 
 class CopyToMatchingSubdir(CopyToSubdir):
     __key__ = 'copy_to_matching_subdir'
@@ -98,21 +100,38 @@ class CopyToMatchingSubdir(CopyToSubdir):
             self.options['chosen_subdir'] = self.options['target'].name
 
 
-class CopyContentsTo(CopyTo):
+class CopyContentsTo(CopyToSubdir):
     __key__ = 'copy_contents_to'
 
-    def perform(self, path, dry_run):
+    def subdir(self):
+        if self.options.get('preserve_dir', False):
+            return os.path.basename(self.options['target'].path)
+
+        return None
+
+    def validate_subdir(self): pass
+
+    def perform(self, dry_run):
+        path = self.options['target'].path
         contents = [os.path.join(path, f) for f in os.listdir(path)]
         only = as_list(self.options.get('only', []))
         exclude = as_list(self.options.get('exclude', []))
 
+        if only:
+            logger.debug("Only: %s" % only)
+        if exclude:
+            logger.debug("Exclude: %s" % exclude)
+
         for f in contents:
             ext = os.path.splitext(f)[1]
+            if ext.startswith('.'):
+                ext = ext[1:]
+
             if ((only and ext in only) or
               (not only and exclude and ext not in exclude) or
               (not only and not exclude)):
-                super(CopyContentsTo, self).perform(f, dry_run=dry_run)
+                self.copy_file_or_dir(f, dry_run=dry_run)
 
             else:
-                logger.info("%s did not pass extension filter" % f)
+                logger.debug("%s did not pass extension filter" % f)
 

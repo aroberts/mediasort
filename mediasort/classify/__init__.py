@@ -10,6 +10,8 @@ from mediasort.classify.imdb import (
 
 from mediasort.classify.tv import detect_tv
 from mediasort.classify.movies import detect_movie
+from mediasort.classify.music import detect_music
+
 
 from mediasort.classify.classification import (
     MEDIA_TYPES,
@@ -49,6 +51,11 @@ class Classifier(object):
             classifications.extend([
                 detect_tv(path),
                 detect_movie(path),
+            ])
+
+        if any(['audio' in t for t in types]):
+            classifications.extend([
+                detect_music(path, types),
             ])
 
         return max(classifications)
