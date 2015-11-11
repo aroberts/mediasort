@@ -53,8 +53,6 @@ class CopyTo(Action):
         if mode:
             logger.debug("set '%s' to '%r'" % (path, mode))
             os.chmod(dst, mode)
-        else:
-            logger.debug("'%s': mode was empty" % path)
 
 
 class CopyToSubdir(CopyTo):
