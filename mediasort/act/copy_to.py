@@ -44,6 +44,10 @@ class CopyTo(Action):
 
     def copy_dir(self, src, dst_root):
         dst = os.path.join(dst_root, os.path.basename(src))
+        if os.path.exists(dst):
+            msg = '%s: directory already exists'
+            logger.error(msg)
+            raise click.ClickException(msg)
         shutil.copytree(src, dst)
         self.set_mode(dst, self.options.get('permissions'))
 
