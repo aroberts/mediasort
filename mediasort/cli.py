@@ -1,4 +1,4 @@
-from mediasort import setup_logging
+from mediasort import setup_logging, setup_mime
 
 from mediasort.classify import Classifier
 from mediasort.classify.classification import Classification
@@ -26,6 +26,7 @@ path_option = click.argument('path')
 def cli(ctx, config):
     conf = yaml.load(config)
     setup_logging(conf)
+    setup_mime(conf)
 
     ctx.obj = dict(
         config=conf
