@@ -18,12 +18,27 @@ dry_run_option = click.option('--dry-run', '-d',
                               help='don\'t make any filesystem changes',
                               is_flag=True,
                               default=False)
+quiet_option = click.option('--quiet', '-q',
+                              help='Quieter operation',
+                              is_flag=True,
+                              default=False)
+verbose_option = click.option('--verbose', '-v',
+                              help='Quieter operation',
+                              is_flag=True,
+                              default=False)
 path_option = click.argument('path')
 
 @click.group()
 @config_option
+@quiet_option
+@verbose_option
+@click.version_option()
 @click.pass_context
-def cli(ctx, config):
+def cli(ctx, config, quiet, verbose):
+
+    if quiet and verbose:
+        raise click.ClickException("Can't set both --quiet and --verbose")
+
     conf = yaml.load(config)
     setup_logging(conf)
     setup_mime(conf)

@@ -10,7 +10,6 @@ from fuzzywuzzy import process
 
 from mediasort.act import Action
 from mediasort.lib import as_list
-from mediasort.lib import validate
 
 
 class CopyTo(Action):
