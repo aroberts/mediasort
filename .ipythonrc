@@ -1,0 +1,18 @@
+import yaml
+from datetime import datetime, timedelta
+
+from mediasort.act import Action
+from mediasort.classify import (
+    Classifier,
+    Classification,
+    MEDIA_TYPES,
+)
+from mediasort.lib import as_list
+
+
+from mediasort.cli import DEFAULT_CONFIG
+conf = dict(DEFAULT_CONFIG)
+with open('config.yml', 'r') as f:
+    conf.update(yaml.load(f))
+
+classifier = Classifier(conf)

@@ -4,6 +4,8 @@ logger = logging.getLogger(__name__)
 import click
 
 from mediasort.lib.validate import Validatable
+from mediasort.lib import as_list
+from mediasort.classify.classification import MEDIA_TYPES
 
 registry = {}
 
@@ -30,16 +32,47 @@ class Action(Validatable):
         self.options = options
 
     @classmethod
-    def from_config(cls, action_hash, classification):
+    def validate_definition(cls, definition):
+        errors = []
+        if 'media_type' not in definition:
+            errors.append("is missing `media_type`")
+        if definition['media_type'] not in MEDIA_TYPES:
+            errors.append("has an invalid `media_type`")
 
-        definitions = action_hash['perform']
-        if isinstance(definitions, dict):
-            definitions = [definitions]
+        if 'confidence' not in definition:
+            errors.append("is missing `confidence`")
+        if not isinstance(definition['confidence'], (int, float)):
+            errors.append("must provide `confidence` as a number")
+
+        if 'perform' not in definition:
+            errors.append("is missing `perform`")
+
+        for perform in as_list(definition['perform']):
+            for key, options in perform.items():
+                options['target'] = None
+
+                if key in registry:
+                    action = registry[key](options)
+                    try:
+                        action.validate_options()
+                    except click.ClickException, e:
+                        errors.append("error: %s" % e.message)
+                else:
+                    errors.append("references unknown perform: '%s'" % key)
+
+        return errors
+
+    def error_message(self, msg):
+        return "%s: %s" % (self.__key__, msg)
+
+
+    @classmethod
+    def from_config(cls, action_hash, classification):
 
         try:
             actions = [
                 registry[action](options)
-                for d in definitions
+                for d in as_list(action_hash['perform'])
                 for action, options in d.items()
             ]
 
@@ -61,5 +94,5 @@ class Action(Validatable):
         pass
 
 
-from mediasort.act.copy_to import CopyTo
-from mediasort.act.copy_to import CopyContentsTo
+from mediasort.act import copy_to
+from mediasort.act import plex
