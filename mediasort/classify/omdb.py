@@ -5,6 +5,9 @@ logger = logging.getLogger(__name__)
 
 class Omdb(object):
 
+    def __init__(self, config):
+        self.config = config
+
     def api(self, title=None, imdb=None, year=None):
         if not (title or imdb):
             return None

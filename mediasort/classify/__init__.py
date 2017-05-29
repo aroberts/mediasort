@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class Classifier(object):
 
     def __init__(self, config):
-        self.omdb = Omdb()
+        self.omdb = Omdb(config)
         self.config = config
 
     def get_types(self, path):
