@@ -13,6 +13,9 @@ class Omdb(object):
             return None
 
         params = dict(t=title, i=imdb, y=year)
+        if 'omdb_api_key' in self.config:
+            params['apikey'] = self.config['omdb_api_key']
+
         resp = requests.get("http://www.omdbapi.com", params=params)
         try:
             answer = resp.json()
