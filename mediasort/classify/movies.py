@@ -15,9 +15,7 @@ HD_YEAR_RES_REGEX = re.compile(
     re.IGNORECASE
 )
 
-omdb = Omdb()
-
-def detect_movie(path):
+def detect_movie(path, omdb):
     score = 0
 
     f = os.path.basename(path)

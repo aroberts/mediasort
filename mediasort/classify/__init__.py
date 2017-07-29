@@ -51,7 +51,7 @@ class Classifier(object):
         if any(['video' in t for t in types]):
             classifications.extend([
                 detect_tv(path),
-                detect_movie(path),
+                detect_movie(path, self.omdb),
             ])
 
         if any(['audio' in t for t in types]):
