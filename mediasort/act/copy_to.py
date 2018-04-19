@@ -136,7 +136,7 @@ class CopyContentsTo(CopyToSubdir):
             logger.debug("Exclude: %s" % exclude)
 
         for f in contents:
-            ext = os.path.splitext(f)[1]
+            ext = os.path.splitext(f)[1].lower()
             if ext.startswith('.'):
                 ext = ext[1:]
 
